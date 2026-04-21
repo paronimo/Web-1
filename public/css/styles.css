@@ -7,17 +7,16 @@
     --border: rgba(126, 40, 77, 0.18);
 }
 register {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 12px;
-    max-width: 400px;
-    margin: 0 auto;
+    display: grid;
+    justify-items: center;
+    gap: 20px;
     padding: 22px;
+    margin: 20px;
     background: var(--surface-strong);
     border: 1px solid var(--border);
     border-radius: 28px;
     box-shadow: 0 10px 24px rgba(126, 40, 77, 0.08);
+    margin-top: 18px;
 }
 * {
     box-sizing: border-box;
@@ -64,7 +63,6 @@ nav a:hover {
     background: rgba(255, 255, 255, 0.16);
     transform: translateY(-1px);
 }
-
 main {
     max-width: 1180px;
     margin: 24px auto;
@@ -84,6 +82,7 @@ main {
     justify-items: center;
     gap: 20px;
     padding: 22px;
+    margin: 20px;
     background: var(--surface-strong);
     border: 1px solid var(--border);
     border-radius: 28px;
