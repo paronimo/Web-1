@@ -130,6 +130,19 @@ main {
     justify-items: center;
 }
 
+.productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    justify-items: center;
+    gap: 20px;
+    padding: 22px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    box-shadow: 0 10px 24px rgba(126, 40, 77, 0.08);
+    margin-top: 18px;
+}
+
 .target {
     display: flex;
     flex-direction: column;

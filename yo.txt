@@ -271,3 +271,40 @@ footer {
     color: #6d5e6f;
     text-align: center;
 }
+
+y aqui el index.ejs que ya sabes donde se encuentra... en cuanto al resto lo tengo normal e igual
+<%- include('../partials/header') %>
+<div class="products">
+    <h2>Productos</h2>
+    <div class="products-grid">
+        <div class="target">
+            <a href="/products">
+                <img src="../images/macbookNEO.png">
+                <div class="target-info">
+                    <h3>Macbook NEO</h3>
+                    <p>100 pts</p>
+                </div>
+            </a>
+        </div>
+        <div class="target">
+            <a href="/products">
+                <img src="../images/botellita.png">
+                <div class="target-info">
+                    <h3>Botellita</h3>
+                    <p>170 pts</p>
+                </div>
+            </a>
+        </div>
+        <div class="target">
+            <a href="/products">
+                <img src="../images/botella-verde.png">
+                <div class="target-info">
+                    <h3>Botella Verde</h3>
+                    <p>165 pts</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+<%- include('../partials/footer') %>
+
