@@ -6,33 +6,17 @@
     --surface-strong: #fff;
     --border: rgba(126, 40, 77, 0.18);
 }
-.register-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 40px 20px;
-}
-
-.register-container h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: var(--text);
-}
-
-.register {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 12px;
-    max-width: 400px;
-    width: 100%;
+register {
+    display: grid;
+    justify-items: center;
+    gap: 20px;
     padding: 22px;
+    margin: 20px;
     background: var(--surface-strong);
     border: 1px solid var(--border);
     border-radius: 28px;
     box-shadow: 0 10px 24px rgba(126, 40, 77, 0.08);
+    margin-top: 18px;
 }
 
 .register form {
@@ -100,7 +84,6 @@ nav a:hover {
     background: rgba(255, 255, 255, 0.16);
     transform: translateY(-1px);
 }
-
 main {
     max-width: 1180px;
     margin: 24px auto;
@@ -111,6 +94,7 @@ main {
     max-width: 1180px;
     margin: 24px auto;
     padding: 22px;
+    margin: 20px;
     background: var(--surface-strong);
     border: 1px solid var(--border);
     border-radius: 28px;
