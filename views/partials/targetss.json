@@ -1,0 +1,14 @@
+[
+  {
+    "id": "vaso-01",
+    "nombre": "Vaso Térmico",
+    "precio": 80,
+    "imagen": "/images/vaso.png"
+  },
+  {
+    "id": "macbook-01",
+    "nombre": "Macbook NEO",
+    "precio": 100,
+    "imagen": "/images/macbookNEO.png"
+  }
+]

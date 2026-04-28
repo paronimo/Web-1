@@ -3,14 +3,28 @@
 <head>
     <title>Ecommerce</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 <header>
-    <h1>Mi Ecommerce</h1>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/cart">Carrito</a>
-        <a href="/login">Login</a>
-        <a href="/register">Registro</a>
-    </nav>
-</header>
+    <div class="container-padre">
+        <h1>Mi Ecommerce</h1>
+            <button class="cart-button" onclick="window.location.href='/cart'">🛒</button>
+        <div class="Perfil-container">
+            <img src="/images/perfil.webp" class="perfil" alt="Foto de perfil">
+            <span class="username"><%= user %></span>
+        </div>
+
+        <div class="barra-busqueda">
+            <form class="formulario-busqueda" action="/buscar" method="get">
+                <input type="text" class="campo-busqueda" name="q" placeholder="Buscar...">
+                <button type="submit" class="boton-buscar">Buscar</button>
+            </form>
+        </div>
+        
+        <nav>
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="/register">Registro</a>
+        </nav>
+    </div> </header>

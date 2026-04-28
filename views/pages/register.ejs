@@ -1,14 +1,70 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { title: 'Registro - Mi Ecommerce', currentPage: 'register' }) %>
 
-<h2>Registro</h2>
-<div class="target">
-<form>
-    <input type="text" placeholder="Nombre">
-    <input type="email" placeholder="Email">
-    <input type="password" placeholder="Contraseña">
-    <button>Registrarse</button>
-</form>
-<a href="/login">Ya tengo cuenta</a>
+<div class="auth-container">
+    <div class="auth-card slide-up">
+        <div class="register">
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <label for="name" class="form-label">Nombre completo</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        class="input"
+                        placeholder="Ingresa tu nombre completo"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Correo electrónico</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="input"
+                        placeholder="tu@email.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="input"
+                        placeholder="Crea una contraseña segura"
+                        required
+                        minlength="6"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        class="input"
+                        placeholder="Repite tu contraseña"
+                        required
+                        minlength="6"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    Crear cuenta
+                </button>
+            </form>
+
+            <div class="auth-actions">
+                <p>¿Ya tienes cuenta? <a href="/login" class="auth-link">Inicia sesión</a></p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <%- include('../partials/footer') %>

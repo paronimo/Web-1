@@ -1,0 +1,23 @@
+<%- include('../partials/header') %>
+<div class="products">
+<% if (id === 'macbook') { %>
+<h2>Macbook NEO</h2>
+<img src="/images/macbookNEO.png">
+<p>Descripción del producto Macbook NEO</p>
+<p>Precio: 100 pts</p>
+<% } else if (id === 'botellita') { %>
+<h2>Botellita</h2>
+<img src="/images/botellita.png">
+<p>Descripción del producto Botellita</p>
+<p>Precio: 170 pts</p>
+<% } else if (id === 'botella-verde') { %>
+<h2>Botella Verde</h2>
+<img src="/images/botella-verde.png">
+<p>Descripción del producto Botella Verde</p>
+<p>Precio: 165 pts</p>
+<% } else { %>
+<h2>Producto no encontrado</h2>
+<% } %>
+<a href="/cart">Ver Carrito</a>
+</div>
+<%- include('../partials/footer') %>
