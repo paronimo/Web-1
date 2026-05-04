@@ -1,17 +1,32 @@
 {
   "name": "mi-ecommerce",
   "version": "1.0.0",
-  "main": "app.js",
-  "dependencies": {
-    "ejs": "^3.1.10",
-    "express": "^4.22.1"
-  },
   "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/paronimo/Web-1#readme",
+  "bugs": {
+    "url": "https://github.com/paronimo/Web-1/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paronimo/Web-1.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "dependencies": {
+    "cors": "^2.8.6",
+    "ejs": "^3.1.10",
+    "express": "^4.22.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-rate-limit": "^8.4.1",
+    "express-session": "^1.19.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
+    "serve-favicon": "^2.5.1"
+  }
 }

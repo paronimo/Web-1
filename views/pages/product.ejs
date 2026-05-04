@@ -1,23 +1,77 @@
-<%- include('../partials/header') %>
-<div class="products">
-<% if (id === 'macbook') { %>
-<h2>Macbook NEO</h2>
-<img src="/images/macbookNEO.png">
-<p>Descripción del producto Macbook NEO</p>
-<p>Precio: 100 pts</p>
-<% } else if (id === 'botellita') { %>
-<h2>Botellita</h2>
-<img src="/images/botellita.png">
-<p>Descripción del producto Botellita</p>
-<p>Precio: 170 pts</p>
-<% } else if (id === 'botella-verde') { %>
-<h2>Botella Verde</h2>
-<img src="/images/botella-verde.png">
-<p>Descripción del producto Botella Verde</p>
-<p>Precio: 165 pts</p>
-<% } else { %>
-<h2>Producto no encontrado</h2>
-<% } %>
-<a href="/cart">Ver Carrito</a>
-</div>
-<%- include('../partials/footer') %>
+<main>
+    <section class="products">
+        <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 280px;">
+                <img src="<%= producto.imagen || '/images/perfil.webp' %>" alt="<%= producto.nombre %>" style="width: 100%; border-radius: 16px; object-fit: cover;" onerror="this.src='/images/perfil.webp'">
+            </div>
+
+            <div style="flex: 1; min-width: 320px;">
+                <h1 style="font-size: 32px; color: var(--text); margin: 0 0 12px 0;"><%= producto.nombre %></h1>
+
+                <p style="color: #888; font-size: 14px; margin-bottom: 16px;"><strong>Categoría:</strong> <%= producto.categoria %></p>
+                <p style="color: #888; font-size: 14px; margin-bottom: 16px;"><strong>Stock:</strong> <%= producto.stock %> unidades</p>
+
+                <div style="background: var(--primary-soft); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                    <p style="font-size: 28px; color: var(--primary); font-weight: 700; margin: 0;">
+                        <%= producto.precio %> <span style="font-size: 14px;">pts</span>
+                    </p>
+                </div>
+
+                <p style="line-height: 1.6; color: var(--text); margin-bottom: 24px;"><%= producto.descripcion %></p>
+
+                <form action="/cart/add" method="POST">
+                    <input type="hidden" name="productId" value="<%= producto.id %>">
+                    <button type="submit" style="width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity 0.2s;" <%= producto.stock === 0 ? 'disabled' : '' %>>
+                        <%= producto.stock === 0 ? 'Sin stock' : '🛒 Agregar al carrito' %>
+                    </button>
+                </form>
+
+                <a href="/cart" style="display: inline-block; text-align: center; width: 100%; margin-top: 12px; padding: 12px; background: var(--surface); color: var(--primary); text-decoration: none; border-radius: 12px; font-weight: 600; transition: background 0.2s;">
+                    Ver carrito
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="products">
+        <h2>Productos relacionados</h2>
+        <% if (productosRelacionados && productosRelacionados.length) { %>
+            <div class="products-grid">
+                <% productosRelacionados.forEach(productoRelacionado => { %>
+                    <%- include('../partials/target', { producto: productoRelacionado }) %>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p>No hay productos relacionados disponibles.</p>
+        <% } %>
+    </section>
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

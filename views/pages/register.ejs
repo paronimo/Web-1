@@ -3,7 +3,13 @@
 <div class="auth-container">
     <div class="auth-card slide-up">
         <div class="register">
-            <form action="/register" method="POST">
+            <% if (typeof error !== 'undefined') { %>
+                <div class="error-message" style="color: #d32f2f; padding: 10px; border: 1px solid #d32f2f; border-radius: 4px; margin-bottom: 15px; background-color: #ffebee;">
+                    <%= error %>
+                </div>
+            <% } %>
+            
+            <form action="/register" method="POST" id="registerForm" onsubmit="return validateForm()">
                 <div class="form-group">
                     <label for="name" class="form-label">Nombre completo</label>
                     <input
@@ -38,8 +44,9 @@
                         class="input"
                         placeholder="Crea una contraseña segura"
                         required
-                        minlength="6"
+                        minlength="8"
                     >
+                    <div id="passwordFeedback" class="password-feedback"></div>
                 </div>
 
                 <div class="form-group">
@@ -51,7 +58,7 @@
                         class="input"
                         placeholder="Repite tu contraseña"
                         required
-                        minlength="6"
+                        minlength="8"
                     >
                 </div>
 
@@ -66,5 +73,114 @@
         </div>
     </div>
 </div>
+
+<style>
+    .password-feedback {
+        font-size: 12px;
+        margin-top: 5px;
+        min-height: 20px;
+    }
+    .password-feedback.error { color: #d32f2f; }
+    .password-feedback.success { color: #388e3c; }
+    .error-message { color: #d32f2f !important; }
+</style>
+
+<script>
+    const siteName = 'Mi Ecommerce';
+    const prohibitedStrings = ['password', '1234', 'qwerty'];
+
+    function validatePassword(password, name, email) {
+        const errors = [];
+
+        // Validar longitud mínima
+        if (password.length < 8) {
+            errors.push('Mínimo 8 caracteres');
+        }
+
+        // Validar que contiene al menos una letra
+        if (!/[a-zA-Z]/.test(password)) {
+            errors.push('Incluir al menos una letra');
+        }
+
+        // Validar que contiene al menos un número
+        if (!/\d/.test(password)) {
+            errors.push('Incluir al menos un número');
+        }
+
+        // Validar que contiene al menos un carácter especial
+        if (!/[!@#$%^&*(),.?":{}<>|]/.test(password)) {
+            errors.push('Incluir un carácter especial (! @ # $ % ^ & * ( ) , . ? " : { } | < >)');
+        }
+
+        // Validar que no contiene cadenas prohibidas
+        const lowerPassword = password.toLowerCase();
+        for (let forbidden of prohibitedStrings) {
+            if (lowerPassword.includes(forbidden)) {
+                errors.push(`No puede contener: "${forbidden}"`);
+            }
+        }
+
+        // Validar que no contiene el nombre del sitio
+        if (lowerPassword.includes(siteName.toLowerCase())) {
+            errors.push(`No puede contener el nombre del sitio: "${siteName}"`);
+        }
+
+        // Validar que no contiene el nombre del usuario
+        if (name && lowerPassword.includes(name.toLowerCase())) {
+            errors.push('No puede contener tu nombre de usuario');
+        }
+
+        // Validar que no es igual al email
+        if (email && lowerPassword.includes(email.toLowerCase())) {
+            errors.push('No puede ser igual a tu email');
+        }
+
+        return errors;
+    }
+
+    function validateForm() {
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // Validar contraseña
+        const errors = validatePassword(password, name, email);
+
+        if (errors.length > 0) {
+            alert('Contraseña inválida:\n\n' + errors.join('\n'));
+            return false;
+        }
+
+        // Validar que las contraseñas coinciden
+        if (password !== confirmPassword) {
+            alert('Las contraseñas no coinciden');
+            return false;
+        }
+
+        return true;
+    }
+
+    // Validación en tiempo real
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const feedback = document.getElementById('passwordFeedback');
+
+        const errors = validatePassword(password, name, email);
+
+        if (password.length === 0) {
+            feedback.textContent = '';
+            feedback.className = '';
+        } else if (errors.length > 0) {
+            feedback.textContent = 'Contraseña débil: ' + errors.slice(0, 2).join(', ');
+            feedback.className = 'password-feedback error';
+        } else {
+            feedback.textContent = '✓ Contraseña válida';
+            feedback.className = 'password-feedback success';
+        }
+    });
+</script>
 
 <%- include('../partials/footer') %>

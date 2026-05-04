@@ -1,7 +1,16 @@
 [
   {
-    "name": "damn",
-    "email": "macielvigneau@gmail.com",
-    "password": "ladygaga"
+    "id": 1777665660747,
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "password": "SecurePass2024!",
+    "createdAt": "2026-05-01T20:01:00.747Z"
+  },
+  {
+    "id": 1777666150731,
+    "name": "paronimo",
+    "email": "panchita@gmail.com",
+    "password": "ladygaga1!",
+    "createdAt": "2026-05-01T20:09:10.731Z"
   }
 ]
