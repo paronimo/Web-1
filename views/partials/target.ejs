@@ -1,3 +1,8 @@
+<%#Explicacion:
+Este partial muestra un producto en la página principal, incluyendo su imagen, nombre
+ y precio. También muestra un badge si el producto está sin stock.
+%>  
+
 <div class="target <%= producto.stock === 0 ? 'target--soldout' : '' %>">
     <a href="<%= producto.stock === 0 ? 'javascript:void(0)' : '/products/' + producto.id %>"
        class="target-link <%= producto.stock === 0 ? 'disabled-link' : '' %>">
