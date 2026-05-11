@@ -5,8 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const productRouter = require('./views/routers/productRoute');
 const productModel = require('./views/models/productModel');
-const cartService = require("./views/services/cartService");
-const cartController = require("./views/controlers/cartController");
 const morgan = require("morgan");
 const favicon = require("serve-favicon");
 const cors = require("cors");
@@ -131,8 +129,8 @@ app.use(session({
 }));
 // Middleware para manejar el carrito y usuario en las vistas
 app.use((req, res, next) => {
-  req.session.cart = cartService.initCart(req.session.cart);
-  res.locals.cartCount = cartService.getCartCount(req.session.cart);
+  req.session.cart = req.session.cart || [];
+  res.locals.cartCount = req.session.cart.reduce((sum, item) => sum + item.quantity, 0);
   res.locals.user = 'Invitado';
   next();
 });
@@ -145,9 +143,33 @@ app.get('/', (req, res) => {
   res.render('pages/index', { productos, productosSugeridos });
 });
 // Rutas para carrito y autenticación
-app.post('/cart/add', cartController.addProduct);
+app.post('/cart/add', (req, res) => {
+  const { productId } = req.body;
+  const product = productModel.getById(productId);
+  if (!product) {
+    return res.redirect(req.headers.referer || '/');
+  }
+// Verificar si el producto ya está en el carrito
+  const existing = req.session.cart.find(item => item.productId === productId);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    req.session.cart.push({ productId, quantity: 1 });
+  }
+// Redirigir de vuelta a la página anterior o al inicio
+  res.redirect(req.headers.referer || '/');
+});
 
-app.get('/cart', cartController.showCart);
+app.get('/cart', (req, res) => {
+  const cartItems = req.session.cart
+    .map(item => {
+      const product = productModel.getById(item.productId);
+      return product ? { ...product, quantity: item.quantity, subtotal: product.precio * item.quantity } : null;
+    })
+    .filter(Boolean);
+  const total = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+  res.render('pages/cart', { cartItems, total });
+});
 // Rutas para login y registro
 app.get('/login', (req, res) => res.render('pages/login', { layout: false }));
 app.get('/register', (req, res) => res.render('pages/register', { layout: false }));

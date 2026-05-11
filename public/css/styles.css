@@ -202,8 +202,11 @@ main {
     background-color: #474747;
     width: 90%;
     margin-left: 5%;
+    font-family: Arial;
 }
-
+.category-strip p{
+    color: #f2f2f2;
+}
 .category-strip button {
     display: inline-flex;
     align-items: center;

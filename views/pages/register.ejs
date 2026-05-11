@@ -101,32 +101,27 @@
         if (!/[a-zA-Z]/.test(password)) {
             errors.push('Incluir al menos una letra');
         }
-
-        // Validar que contiene al menos un número
-        if (!/\d/.test(password)) {
+  
+        if (!/\d/.test(password)) {       // Validar que contiene al menos un número//
             errors.push('Incluir al menos un número');
         }
 
-        // Validar que contiene al menos un carácter especial
-        if (!/[!@#$%^&*(),.?":{}<>|]/.test(password)) {
+        if (!/[!@#$%^&*(),.?":{}<>|]/.test(password)) { // Validar que contiene al menos un carácter especial 
             errors.push('Incluir un carácter especial (! @ # $ % ^ & * ( ) , . ? " : { } | < >)');
         }
-
-        // Validar que no contiene cadenas prohibidas
-        const lowerPassword = password.toLowerCase();
+ 
+        const lowerPassword = password.toLowerCase(); // Validar que no contiene cadenas prohibidas
         for (let forbidden of prohibitedStrings) {
             if (lowerPassword.includes(forbidden)) {
                 errors.push(`No puede contener: "${forbidden}"`);
             }
         }
 
-        // Validar que no contiene el nombre del sitio
-        if (lowerPassword.includes(siteName.toLowerCase())) {
+        if (lowerPassword.includes(siteName.toLowerCase())) {   // Validar que no contiene el nombre del sitio
             errors.push(`No puede contener el nombre del sitio: "${siteName}"`);
         }
 
-        // Validar que no contiene el nombre del usuario
-        if (name && lowerPassword.includes(name.toLowerCase())) {
+        if (name && lowerPassword.includes(name.toLowerCase())) { // Validar que no contiene el nombre del usuario
             errors.push('No puede contener tu nombre de usuario');
         }
 
@@ -137,8 +132,11 @@
 
         return errors;
     }
-
+        // Validar el formulario antes de enviarlo
     function validateForm() {
+        //esto hace que se lean los valores de los campos de nombre, email, contraseña y confirmación de contraseña, 
+        // y luego llama a la función validatePassword para verificar si la contraseña cumple 
+        // con los criterios establecidos. Si hay errores, muestra una alerta con los mensajes correspondientes y evita que el formulario se envíe. También verifica que las contraseñas coincidan antes de permitir el envío del formulario.
         const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
