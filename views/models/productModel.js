@@ -1,6 +1,6 @@
 const products = [
   {
-    id: 'macbook',
+    id: 1,
     nombre: 'Macbook NEO',
     precio: 100,
     imagen: '/images/macbookneo.png',
@@ -9,7 +9,7 @@ const products = [
     descripcion: 'Laptop de última generación con procesador de alto rendimiento, pantalla retina y batería de larga duración.'
   },
   {
-    id: 'botellita',
+    id: 2,
     nombre: 'Botellita',
     precio: 170,
     imagen: '/images/botellita.jpg',
@@ -18,7 +18,7 @@ const products = [
     descripcion: 'Botella reusable de diseño moderno, ideal para llevar tu bebida favorita a todas partes.'
   },
   {
-    id: 'botella-verde',
+    id: 3,
     nombre: 'Botella Verde',
     precio: 165,
     imagen: '/images/botella_verde.png',
@@ -27,7 +27,7 @@ const products = [
     descripcion: 'Botella ecológica con acabado matte, perfecta para beber agua durante el día.'
   },
   {
-    id: 'taza-violeta',
+    id: 4,
     nombre: 'Taza Violeta',
     precio: 60,
     imagen: '/images/taza_violeta.png',
@@ -36,7 +36,7 @@ const products = [
     descripcion: 'Taza cerámica de edición especial con un color vibrante y diseño cuidado.'
   },
   {
-    id: 'vaso',
+    id: 5,
     nombre: 'Vaso',
     precio: 80,
     imagen: '/images/vaso.png',
@@ -45,7 +45,7 @@ const products = [
     descripcion: 'Vaso resistente y elegante, ideal para cualquier bebida fría o caliente.'
   },
   {
-    id: 'libros-personalizables',
+    id: 6,
     nombre: 'Libros Personalizables',
     precio: 120,
     imagen: '/images/libros_personalizables.png',
@@ -54,7 +54,7 @@ const products = [
     descripcion: 'Set de libros personalizables pensados para creatividad y aprendizaje.'
   },
   {
-    id: 'bandeja',
+    id: 7,
     nombre: 'Bandeja Retro',
     precio: 140,
     imagen: '/images/bandeja.png',
@@ -66,6 +66,14 @@ const products = [
 
 function getAll() {
   return products;
+}
+
+function normalizeId(id) {
+  const numId = Number(id);
+  if (isNaN(numId) || !Number.isInteger(numId) || numId <= 0) {
+    return null;
+  }
+  return numId;
 }
 
 function getById(id) {
@@ -81,5 +89,6 @@ function getRelated(product, limit = 4) {
 module.exports = {
   getAll,
   getById,
-  getRelated
+  getRelated,
+  normalizeId
 };

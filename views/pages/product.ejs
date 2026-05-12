@@ -1,32 +1,32 @@
 <main>
     <section class="products">
-        <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 280px;">
-                <img src="<%= producto.imagen || '/images/perfil.webp' %>" alt="<%= producto.nombre %>" style="width: 100%; border-radius: 16px; object-fit: cover;" onerror="this.src='/images/perfil.webp'">
+        <div class="product-detail-container">
+            <div class="product-image-container">
+                <img src="<%= producto.imagen || '/images/perfil.webp' %>" alt="<%= producto.nombre %>" class="product-image" onerror="this.src='/images/perfil.webp'">
             </div>
 
-            <div style="flex: 1; min-width: 320px;">
-                <h1 style="font-size: 32px; color: var(--text); margin: 0 0 12px 0;"><%= producto.nombre %></h1>
+            <div class="product-info-container">
+                <h1 class="product-title"><%= producto.nombre %></h1>
 
-                <p style="color: #888; font-size: 14px; margin-bottom: 16px;"><strong>Categoría:</strong> <%= producto.categoria %></p>
-                <p style="color: #888; font-size: 14px; margin-bottom: 16px;"><strong>Stock:</strong> <%= producto.stock %> unidades</p>
+                <p class="product-meta"><strong>Categoría:</strong> <%= producto.categoria %></p>
+                <p class="product-meta"><strong>Stock:</strong> <%= producto.stock %> unidades</p>
 
-                <div style="background: var(--primary-soft); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
-                    <p style="font-size: 28px; color: var(--primary); font-weight: 700; margin: 0;">
-                        <%= producto.precio %> <span style="font-size: 14px;">pts</span>
+                <div class="product-price-box">
+                    <p class="product-price">
+                        <%= producto.precio %> <span class="product-price-unit">pts</span>
                     </p>
                 </div>
 
-                <p style="line-height: 1.6; color: var(--text); margin-bottom: 24px;"><%= producto.descripcion %></p>
+                <p class="product-description"><%= producto.descripcion %></p>
 
                 <form action="/cart/add" method="POST">
                     <input type="hidden" name="productId" value="<%= producto.id %>">
-                    <button type="submit" style="width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity 0.2s;" <%= producto.stock === 0 ? 'disabled' : '' %>>
+                    <button type="submit" class="btn-add-cart" <%= producto.stock === 0 ? 'disabled' : '' %>>
                         <%= producto.stock === 0 ? 'Sin stock' : '🛒 Agregar al carrito' %>
                     </button>
                 </form>
 
-                <a href="/cart" style="display: inline-block; text-align: center; width: 100%; margin-top: 12px; padding: 12px; background: var(--surface); color: var(--primary); text-decoration: none; border-radius: 12px; font-weight: 600; transition: background 0.2s;">
+                <a href="/cart" class="btn-view-cart">
                     Ver carrito
                 </a>
             </div>

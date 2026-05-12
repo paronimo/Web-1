@@ -3,7 +3,7 @@
 <div class="register-container">
     <h2>Login</h2>
     <% if (typeof error !== 'undefined') { %>
-    <p style="color: red;">Credenciales incorrectas</p>
+    <p class="login-error">Credenciales incorrectas</p>
     <% } %>
     <div class="register">
         <form action="/login" method="POST">

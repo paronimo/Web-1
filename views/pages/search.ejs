@@ -1,0 +1,12 @@
+<div class="products">
+    <h2>Resultados de búsqueda para "<%= query %>"</h2>
+    <div class="products-grid">
+        <% if (productos && productos.length) { %>
+            <% productos.forEach(producto => { %>
+                <%- include('../partials/target', { producto }) %>
+            <% }) %>
+        <% } else { %>
+            <p>No se encontraron productos para "<%= query %>".</p>
+        <% } %>
+    </div>
+</div>

@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const productRouter = require('./views/routers/productRoute');
 const productModel = require('./views/models/productModel');
+const cartService = require('./views/services/cartService');
 const morgan = require("morgan");
 const favicon = require("serve-favicon");
 
@@ -92,8 +93,7 @@ app.use(session({
 }));
 
 app.use((req, res, next) => {
-  req.session.cart = req.session.cart || [];
-  res.locals.cartCount = req.session.cart.reduce((sum, item) => sum + item.quantity, 0);
+  res.locals.cartCount = cartService.getCartCount(req.session);
   res.locals.user = 'Invitado';
   next();
 });
@@ -106,31 +106,58 @@ app.get('/', (req, res) => {
   res.render('pages/index', { productos, productosSugeridos });
 });
 
+app.get('/search', (req, res) => {
+  const query = req.query.query || '';
+  const searchLower = query.toLowerCase();
+  const allProductos = productModel.getAll();
+  
+  const productos = searchLower 
+    ? allProductos.filter(p => p.nombre.toLowerCase().includes(searchLower))
+    : [];
+
+  res.render('pages/search', { productos, query });
+});
+
 app.post('/cart/add', (req, res) => {
-  const { productId } = req.body;
-  const product = productModel.getById(productId);
-  if (!product) {
-    return res.redirect(req.headers.referer || '/');
+  const { productId: rawId } = req.body;
+  const productId = productModel.normalizeId(rawId);
+
+  if (productId === null) {
+    return res.status(400).send('ID de producto inválido');
   }
 
-  const existing = req.session.cart.find(item => item.productId === productId);
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    req.session.cart.push({ productId, quantity: 1 });
+  const product = productModel.getById(productId);
+  if (product) {
+    cartService.addProduct(req.session, productId);
   }
 
   res.redirect(req.headers.referer || '/');
 });
 
+app.post('/cart/remove', (req, res) => {
+  const productId = productModel.normalizeId(req.body.productId);
+  if (productId !== null) {
+    cartService.removeProduct(req.session, productId);
+  }
+  res.redirect('/cart');
+});
+
+app.post('/cart/update', (req, res) => {
+  const productId = productModel.normalizeId(req.body.productId);
+  const quantity = Number(req.body.quantity);
+  if (productId !== null && !isNaN(quantity)) {
+    cartService.updateQuantity(req.session, productId, quantity);
+  }
+  res.redirect('/cart');
+});
+
+app.post('/cart/empty', (req, res) => {
+  cartService.emptyCart(req.session);
+  res.redirect('/cart');
+});
+
 app.get('/cart', (req, res) => {
-  const cartItems = req.session.cart
-    .map(item => {
-      const product = productModel.getById(item.productId);
-      return product ? { ...product, quantity: item.quantity, subtotal: product.precio * item.quantity } : null;
-    })
-    .filter(Boolean);
-  const total = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const { cartItems, total } = cartService.getCartDetails(req.session);
   res.render('pages/cart', { cartItems, total });
 });
 
