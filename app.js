@@ -4,12 +4,15 @@ const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 const fs = require('fs');
 const productRouter = require('./views/routers/productRoute');
-const productModel = require('./views/models/productModel');
+const productsService = require('./views/services/productsService');
+const cartService = require('./views/services/cartService');
+const { normalizeId } = require('./views/utils/idValidator');
 const morgan = require("morgan");
 const favicon = require("serve-favicon");
 const cors = require("cors");
 
 const app = express();
+const allowedOrigins = ['http://localhost:3000'];
 // Helmet para seguridad
 const helmet = require('helmet');
 app.use(morgan("common"))
@@ -138,37 +141,35 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 // Rutas principales
 app.get('/', (req, res) => {
-  const productos = productModel.getAll();
-  const productosSugeridos = productos.slice(0, 5);
+  const productos = productsService.getAllProducts();
+  const productosSugeridos = productsService.getSuggestedProducts(5);
   res.render('pages/index', { productos, productosSugeridos });
 });
 
 app.post('/cart/add', (req, res) => {
   const { productId } = req.body;
-  const product = productModel.getById(productId);
-  if (!product) {
-    return res.redirect(req.headers.referer || '/');
+  const validation = normalizeId(productId, {
+    checkExists: id => productsService.getProductById(id) !== undefined
+  });
+
+  if (!validation.valid) {
+    return res.status(validation.statusCode).render('404', {
+      title: validation.error,
+      url: req.originalUrl
+    });
   }
 
-  const existing = req.session.cart.find(item => item.productId === productId);
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    req.session.cart.push({ productId, quantity: 1 });
+  const result = cartService.addProduct(req.session.cart, validation.id, 1);
+  if (result.success) {
+    req.session.cart = result.cart;
   }
 
   res.redirect(req.headers.referer || '/');
 });
 
 app.get('/cart', (req, res) => {
-  const cartItems = req.session.cart
-    .map(item => {
-      const product = productModel.getById(item.productId);
-      return product ? { ...product, quantity: item.quantity, subtotal: product.precio * item.quantity } : null;
-    })
-    .filter(Boolean);
-  const total = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-  res.render('pages/cart', { cartItems, total });
+  const summary = cartService.getCartSummary(req.session.cart);
+  res.render('pages/cart', { cartItems: summary.items, total: summary.total });
 });
 
 app.get('/login', (req, res) => res.render('pages/login', { layout: false }));
