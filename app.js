@@ -5,17 +5,52 @@ const path = require('path');
 const fs = require('fs');
 const productRouter = require('./views/routers/productRoute');
 const productModel = require('./views/models/productModel');
-const cartService = require('./views/services/cartService');
 const morgan = require("morgan");
 const favicon = require("serve-favicon");
+const cors = require("cors");
 
 const app = express();
+// Helmet para seguridad
+const helmet = require('helmet');
 app.use(morgan("common"))
-
+// Middleware para servir favicon
 app.use(
 	favicon(path.join(__dirname, "public", "favicon.ico"))
 );
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (ej: Postman, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true); // Permitir este origen
+    } else {
+      return callback(new Error("Origen no permitido por CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // solo si usás cookies o tokens en headers
+  maxAge: 600 // cache del preflight (en segundos)
+}));
+
+app.use(helmet());
+const rateLimit = require("express-rate-limit");
+
+// Límite general para toda la app
+const appLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100,                 // 100 requests por IP
+  standardHeaders: true,    // Devuelve RateLimit-* headers
+  legacyHeaders: false      // Desactiva X-RateLimit-* headers antiguos
+});
+
+app.use("/api", appLimiter);
+
 // Función de validación de contraseña
+// Reglas: mínimo 8 caracteres, al menos una letra, un número, un carácter especial, no contener "password", "1234", "qwerty", el nombre del sitio, el nombre de usuario o el email.
+
 function validatePassword(password, name, email) {
   const errors = [];
   const siteName = 'Mi Ecommerce';
@@ -34,17 +69,18 @@ function validatePassword(password, name, email) {
     errors.push('Incluir un carácter especial (! @ # $ % ^ & * ( ) , . ? " : { } | < >)');
   }
 
+  // Verificar que no contenga palabras prohibidas o información personal
   const lowerPassword = password.toLowerCase();
   for (let forbidden of prohibitedStrings) {
     if (lowerPassword.includes(forbidden)) {
       errors.push(`No puede contener: "${forbidden}"`);
     }
   }
-
+// Verificar que no contenga el nombre del sitio, nombre de usuario o email
   if (lowerPassword.includes(siteName.toLowerCase())) {
     errors.push(`No puede contener el nombre del sitio: "${siteName}"`);
   }
-
+// Verificar que no contenga el nombre de usuario o email (si se proporcionan)
   if (name && lowerPassword.includes(name.toLowerCase())) {
     errors.push('No puede contener tu nombre de usuario');
   }
@@ -78,7 +114,7 @@ function findUserByEmail(email) {
   const users = getUsers();
   return users.find(user => user.email.toLowerCase() === email.toLowerCase());
 }
-
+// Configuración de EJS y middlewares
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
@@ -91,73 +127,47 @@ app.use(session({
   saveUninitialized: true
 
 }));
-
+// Middleware para manejar el carrito y usuario en las vistas
 app.use((req, res, next) => {
-  res.locals.cartCount = cartService.getCartCount(req.session);
+  req.session.cart = req.session.cart || [];
+  res.locals.cartCount = req.session.cart.reduce((sum, item) => sum + item.quantity, 0);
   res.locals.user = 'Invitado';
   next();
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
-
+// Rutas principales
 app.get('/', (req, res) => {
   const productos = productModel.getAll();
   const productosSugeridos = productos.slice(0, 5);
   res.render('pages/index', { productos, productosSugeridos });
 });
 
-app.get('/search', (req, res) => {
-  const query = req.query.query || '';
-  const searchLower = query.toLowerCase();
-  const allProductos = productModel.getAll();
-  
-  const productos = searchLower 
-    ? allProductos.filter(p => p.nombre.toLowerCase().includes(searchLower))
-    : [];
-
-  res.render('pages/search', { productos, query });
-});
-
 app.post('/cart/add', (req, res) => {
-  const { productId: rawId } = req.body;
-  const productId = productModel.normalizeId(rawId);
-
-  if (productId === null) {
-    return res.status(400).send('ID de producto inválido');
+  const { productId } = req.body;
+  const product = productModel.getById(productId);
+  if (!product) {
+    return res.redirect(req.headers.referer || '/');
   }
 
-  const product = productModel.getById(productId);
-  if (product) {
-    cartService.addProduct(req.session, productId);
+  const existing = req.session.cart.find(item => item.productId === productId);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    req.session.cart.push({ productId, quantity: 1 });
   }
 
   res.redirect(req.headers.referer || '/');
 });
 
-app.post('/cart/remove', (req, res) => {
-  const productId = productModel.normalizeId(req.body.productId);
-  if (productId !== null) {
-    cartService.removeProduct(req.session, productId);
-  }
-  res.redirect('/cart');
-});
-
-app.post('/cart/update', (req, res) => {
-  const productId = productModel.normalizeId(req.body.productId);
-  const quantity = Number(req.body.quantity);
-  if (productId !== null && !isNaN(quantity)) {
-    cartService.updateQuantity(req.session, productId, quantity);
-  }
-  res.redirect('/cart');
-});
-
-app.post('/cart/empty', (req, res) => {
-  cartService.emptyCart(req.session);
-  res.redirect('/cart');
-});
-
 app.get('/cart', (req, res) => {
-  const { cartItems, total } = cartService.getCartDetails(req.session);
+  const cartItems = req.session.cart
+    .map(item => {
+      const product = productModel.getById(item.productId);
+      return product ? { ...product, quantity: item.quantity, subtotal: product.precio * item.quantity } : null;
+    })
+    .filter(Boolean);
+  const total = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
   res.render('pages/cart', { cartItems, total });
 });
 
@@ -201,6 +211,8 @@ app.post('/register', (req, res) => {
   }
 
   // Crear nuevo usuario
+  /* This code snippet is creating a new user object and adding it to the `users` array. Here's a
+  breakdown of what each property represents: */
   const users = getUsers();
   users.push({
     id: Date.now(),

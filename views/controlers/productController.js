@@ -1,33 +1,35 @@
+const productsService = require('../services/productsService');
+const { normalizeId } = require('../utils/idValidator');
 const productModel = require('../models/productModel');
 
+/**
+ * Controlador de Productos
+ * Toda la lógica de lectura y filtrado está delegada al servicio
+ * El controlador solo coordina la presentación
+ */
+
 exports.showProductList = (req, res) => {
-  let productos = productModel.getAll();
-  const sort = req.query.sort;
-
-  if (sort === 'asc') {
-    productos = [...productos].sort((a, b) => a.precio - b.precio);
-  } else if (sort === 'desc') {
-    productos = [...productos].sort((a, b) => b.precio - a.precio);
-  }
-
-  const productosSugeridos = productos.slice(0, 5);
+  const productos = productsService.getAllProducts();
+  const productosSugeridos = productsService.getSuggestedProducts(5);
+  
   res.render('pages/index', { productos, productosSugeridos });
 };
 
 exports.showProductDetail = (req, res) => {
   const rawId = req.params.id;
-  const productId = productModel.normalizeId(rawId);
+  const validation = normalizeId(rawId, {
+    checkExists: (id) => productModel.getById(id) !== undefined
+  });
 
-  if (productId === null) {
-    return res.status(400).render('404', { title: 'ID de producto inválido', url: req.originalUrl });
+  if (!validation.valid) {
+    return res.status(validation.statusCode).render('404', {
+      title: validation.error,
+      url: req.originalUrl
+    });
   }
 
-  const producto = productModel.getById(productId);
+  const producto = productsService.getProductById(validation.id);
+  const productosRelacionados = productsService.getRelatedProducts(producto, 4);
 
-  if (!producto) {
-    return res.status(404).render('404', { title: 'Producto no encontrado', url: req.originalUrl });
-  }
-
-  const productosRelacionados = productModel.getRelated(producto, 4);
   res.render('pages/product', { producto, productosRelacionados });
 };
