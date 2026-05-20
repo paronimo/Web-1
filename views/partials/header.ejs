@@ -19,14 +19,14 @@
 
         <div class="header-right">
             <button class="cart-button" onclick="window.location.href='/cart'">
-            <span class="cart-count"><%= cartCount || 0 %></span>
+            <span class="cart-count"><p>🛒</p><%= cartCount || 0 %></span>
             </button>
             <div class="Perfil-container">
                 <img src="/images/perfil.webp" class="perfil" alt="Foto de perfil">
                 <span class="username"><%= typeof user !== 'undefined' && user ? user : 'Invitado' %></span>
             </div>
-        </div>
-    </div>
+        </div>          
+  </div>
 
     <nav>
         <a href="/">Home</a>

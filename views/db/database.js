@@ -9,7 +9,7 @@ const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
 
-// Leemos el archivo schema.sql y lo ejecutamos
+// Lee el archivo schema.sql y lo ejecutamos
 const schemaPath = path.join(__dirname, 'schema.sql');
 const schema = fs.readFileSync(schemaPath, 'utf8');
 db.exec(schema);
