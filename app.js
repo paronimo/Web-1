@@ -2,7 +2,6 @@ const express = require('express');
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
-const fs = require('fs');
 const productRouter = require('./views/routers/productRoute');
 const productsService = require('./views/services/productsService');
 const cartService = require('./views/services/cartService');
@@ -10,6 +9,8 @@ const { normalizeId } = require('./views/utils/idValidator');
 const morgan = require("morgan");
 const favicon = require("serve-favicon");
 const cors = require("cors");
+const db = require('./db/database');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const allowedOrigins = ['http://localhost:3000'];
@@ -95,27 +96,15 @@ function validatePassword(password, name, email) {
   return errors;
 }
 
-// Función para obtener usuarios
-function getUsers() {
-  const usersPath = path.join(__dirname, 'users.json');
-  try {
-    const data = fs.readFileSync(usersPath, 'utf8');
-    return JSON.parse(data || '[]');
-  } catch {
-    return [];
-  }
-}
-
-// Función para guardar usuarios
-function saveUsers(users) {
-  const usersPath = path.join(__dirname, 'users.json');
-  fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
-}
-
-// Función para encontrar usuario por email
+// Función para encontrar usuario por email (usa SQLite)
 function findUserByEmail(email) {
-  const users = getUsers();
-  return users.find(user => user.email.toLowerCase() === email.toLowerCase());
+  try {
+    const stmt = db.prepare('SELECT id, name, email, password_hash, created_at FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1');
+    const user = stmt.get(email);
+    return user || null;
+  } catch (err) {
+    return null;
+  }
 }
 // Configuración de EJS y middlewares
 app.set('view engine', 'ejs');
@@ -134,7 +123,7 @@ app.use(session({
 app.use((req, res, next) => {
   req.session.cart = req.session.cart || [];
   res.locals.cartCount = req.session.cart.reduce((sum, item) => sum + item.quantity, 0);
-  res.locals.user = 'Invitado';
+  res.locals.user = req.session.user ? req.session.user.name : 'Invitado';
   next();
 });
 
@@ -214,20 +203,36 @@ app.post('/register', (req, res) => {
   // Crear nuevo usuario
   /* This code snippet is creating a new user object and adding it to the `users` array. Here's a
   breakdown of what each property represents: */
-  const users = getUsers();
-  users.push({
-    id: Date.now(),
-    name: name.trim(),
-    email: email.toLowerCase().trim(),
-    password: password, // En producción, usar bcrypt para encriptar
-    createdAt: new Date().toISOString()
-  });
+  try {
+    const passwordHash = bcrypt.hashSync(password, 10);
+    const insert = db.prepare('INSERT INTO users (name, email, password_hash, created_at) VALUES (?, ?, ?, datetime("now"))');
+    const info = insert.run(name.trim(), email.toLowerCase().trim(), passwordHash);
 
-  saveUsers(users);
+    req.session.registerSuccess = true;
+    return res.redirect('/login');
+  } catch (err) {
+    // posible conflicto de unique constraint
+    return res.render('pages/register', { layout: false, error: 'No se pudo registrar el usuario' });
+  }
+});
 
-  // Redirigir a login con mensaje de éxito
-  req.session.registerSuccess = true;
-  res.redirect('/login');
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.render('pages/login', { layout: false, error: 'Credenciales incorrectas' });
+
+  try {
+    const stmt = db.prepare('SELECT id, name, email, password_hash FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1');
+    const user = stmt.get(email);
+    if (!user) return res.render('pages/login', { layout: false, error: 'Credenciales incorrectas' });
+
+    const ok = bcrypt.compareSync(password, user.password_hash || '');
+    if (!ok) return res.render('pages/login', { layout: false, error: 'Credenciales incorrectas' });
+
+    req.session.user = { id: user.id, name: user.name, email: user.email };
+    return res.redirect('/');
+  } catch (err) {
+    return res.render('pages/login', { layout: false, error: 'Error al autenticar' });
+  }
 });
 
 app.use('/products', productRouter);
