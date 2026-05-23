@@ -6,6 +6,7 @@ const productRouter = require('./views/routers/productRoute');
 const productsService = require('./views/services/productsService');
 const cartService = require('./views/services/cartService');
 const { normalizeId } = require('./views/utils/idValidator');
+const cartController = require('./views/controlers/cartController');
 const morgan = require("morgan");
 const favicon = require("serve-favicon");
 const db = require('./db/database');
@@ -98,9 +99,13 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 // Rutas principales
 app.get('/', (req, res) => {
-  const productos = productsService.getAllProducts();
+  const category = req.query.category;
+
+  // Reutilizamos el servicio para obtener productos filtrados por categoría si viene el query
+  const productos = category ? productsService.getProductsByCategory(category) : productsService.getAllProducts();
   const productosSugeridos = productsService.getSuggestedProducts(5);
-  res.render('pages/index', { productos, productosSugeridos });
+
+  res.render('pages/index', { productos, productosSugeridos, selectedCategory: category });
 });
 
 app.post('/cart/add', (req, res) => {
@@ -124,6 +129,11 @@ app.post('/cart/add', (req, res) => {
   
   res.redirect(req.headers.referer || '/');
 });
+
+// Rutas para acciones del carrito (eliminar, actualizar, vaciar)
+app.post('/cart/remove', cartController.removeProduct);
+app.post('/cart/update', cartController.updateQuantity);
+app.post('/cart/empty', cartController.clearCart);
 
 app.get('/cart', (req, res) => {
   const summary = cartService.getCartSummary(req.session.cart);
