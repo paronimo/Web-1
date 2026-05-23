@@ -8,7 +8,6 @@ const cartService = require('./views/services/cartService');
 const { normalizeId } = require('./views/utils/idValidator');
 const morgan = require("morgan");
 const favicon = require("serve-favicon");
-const cors = require("cors");
 const db = require('./db/database');
 const bcrypt = require('bcryptjs');
 
@@ -22,38 +21,7 @@ app.use(
 	favicon(path.join(__dirname, "public", "favicon.ico"))
 );
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (ej: Postman, curl)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true); // Permitir este origen
-    } else {
-      return callback(new Error("Origen no permitido por CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // solo si usás cookies o tokens en headers
-  maxAge: 600 // cache del preflight (en segundos)
-}));
-
 app.use(helmet());
-const rateLimit = require("express-rate-limit");
-
-// Límite general para toda la app
-const appLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,                 // 100 requests por IP
-  standardHeaders: true,    // Devuelve RateLimit-* headers
-  legacyHeaders: false      // Desactiva X-RateLimit-* headers antiguos
-});
-
-app.use("/api", appLimiter);
-
-// Función de validación de contraseña
-// Reglas: mínimo 8 caracteres, al menos una letra, un número, un carácter especial, no contener "password", "1234", "qwerty", el nombre del sitio, el nombre de usuario o el email.
 
 function validatePassword(password, name, email) {
   const errors = [];
@@ -152,7 +120,8 @@ app.post('/cart/add', (req, res) => {
   if (result.success) {
     req.session.cart = result.cart;
   }
-
+  req.session.save();
+  
   res.redirect(req.headers.referer || '/');
 });
 

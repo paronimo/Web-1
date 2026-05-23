@@ -29,7 +29,7 @@
     border-radius: 50px;
 }
 .cart-button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -39,6 +39,28 @@
     padding: 12px 18px;
     width: auto;
     transition: transform 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+}
+.cart-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-weight: 700;
+    color: white;
+}
+.cart-icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.cart-value {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.95rem;
 }
 .barra-busqueda .formulario-busqueda {
     display: flex;
