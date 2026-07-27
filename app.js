@@ -3,6 +3,8 @@ const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 const productRouter = require('./views/routers/productRoute');
+const apiProductRouter = require('./views/routers/apiProductRoute');
+const apiCartRouter = require('./views/routers/apiCartRoute');
 const productsService = require('./views/services/productsService');
 const cartService = require('./views/services/cartService');
 const { normalizeId } = require('./views/utils/idValidator');
@@ -21,7 +23,23 @@ app.use(morgan("common"))
 app.use(
 	favicon(path.join(__dirname, "public", "favicon.ico"))
 );
+const cors = require("cors");
 
+// Configuración CORS para permitir solicitudes desde otros puertos/dominios
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://127.0.0.1:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+app.use(cors(corsOptions));
+
+// Parsear JSON en el body de las peticiones (IMPORTANTE para POST/PUT)
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Bienvenido a Mi Ecommerce");
+});
 app.use(helmet());
 
 function validatePassword(password, name, email) {
@@ -81,7 +99,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
-app.use(express.urlencoded({ extended: true }));
+
 app.use(session({
   secret: 'un-secreto-seguro',
   resave: false,
@@ -215,6 +233,10 @@ app.post('/login', (req, res) => {
 });
 
 app.use('/products', productRouter);
+
+// Rutas API con prefijo /api para que puedas consumirlas desde React
+app.use('/api/products', apiProductRouter);
+app.use('/api/cart', apiCartRouter);
 
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Página no encontrada', url: req.url });
