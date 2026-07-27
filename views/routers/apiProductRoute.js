@@ -29,19 +29,15 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const validation = normalizeId(id, {
-      checkExists: checkId => productsService.getProductById(checkId) !== undefined
-    });
-
-    if (!validation.valid) {
-      return res.status(validation.statusCode).json({
+    const producto = productsService.getProductById(id);
+    
+    if (!producto) {
+      return res.status(404).json({
         success: false,
-        error: validation.error
+        error: 'Producto no encontrado'
       });
     }
 
-    const producto = productsService.getProductById(validation.id);
-    
     res.json({
       success: true,
       data: producto
@@ -55,48 +51,128 @@ router.get('/:id', (req, res) => {
   }
 });
 
-// GET /api/products/category/:category - Obtener productos por categoría
-router.get('/category/:category', (req, res) => {
+// POST /api/products - Crear nuevo producto
+router.post('/', (req, res) => {
   try {
-    const { category } = req.params;
-    const productos = productsService.getProductsByCategory(category);
-    
-    if (productos.length === 0) {
-      return res.status(404).json({
+    const { nombre, precio, imagen, stock, categoria, descripcion } = req.body;
+
+    // Validar campos requeridos
+    if (!nombre || precio === undefined || !imagen || stock === undefined || !categoria || !descripcion) {
+      return res.status(400).json({
         success: false,
-        error: 'No se encontraron productos en esta categoría'
+        error: 'Faltan campos requeridos: nombre, precio, imagen, stock, categoria, descripcion'
       });
     }
 
-    res.json({
+    // Validar tipos de datos
+    if (typeof nombre !== 'string' || typeof precio !== 'number' || typeof stock !== 'number') {
+      return res.status(400).json({
+        success: false,
+        error: 'Tipos de datos inválidos'
+      });
+    }
+
+    const nuevoProducto = productsService.createProduct(nombre, precio, imagen, stock, categoria, descripcion);
+
+    if (!nuevoProducto) {
+      return res.status(500).json({
+        success: false,
+        error: 'Error al crear el producto'
+      });
+    }
+
+    res.status(201).json({
       success: true,
-      data: productos,
-      total: productos.length
+      data: nuevoProducto,
+      message: 'Producto creado exitosamente'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al buscar productos por categoría',
+      error: 'Error al crear el producto',
       message: error.message
     });
   }
 });
 
-// GET /api/products/suggested/:limit - Obtener productos sugeridos
-router.get('/suggested/:limit?', (req, res) => {
+// PUT /api/products/:id - Actualizar producto
+router.put('/:id', (req, res) => {
   try {
-    const limit = parseInt(req.params.limit) || 5;
-    const productos = productsService.getSuggestedProducts(limit);
-    
+    const { id } = req.params;
+    const { nombre, precio, imagen, stock, categoria, descripcion } = req.body;
+
+    // Verificar que el producto existe
+    const producto = productsService.getProductById(id);
+    if (!producto) {
+      return res.status(404).json({
+        success: false,
+        error: 'Producto no encontrado'
+      });
+    }
+
+    // Validar campos requeridos
+    if (!nombre || precio === undefined || !imagen || stock === undefined || !categoria || !descripcion) {
+      return res.status(400).json({
+        success: false,
+        error: 'Faltan campos requeridos: nombre, precio, imagen, stock, categoria, descripcion'
+      });
+    }
+
+    const productoActualizado = productsService.updateProduct(id, nombre, precio, imagen, stock, categoria, descripcion);
+
+    if (!productoActualizado) {
+      return res.status(500).json({
+        success: false,
+        error: 'Error al actualizar el producto'
+      });
+    }
+
     res.json({
       success: true,
-      data: productos,
-      total: productos.length
+      data: productoActualizado,
+      message: 'Producto actualizado exitosamente'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error al obtener productos sugeridos',
+      error: 'Error al actualizar el producto',
+      message: error.message
+    });
+  }
+});
+
+// DELETE /api/products/:id - Eliminar producto
+router.delete('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar que el producto existe
+    const producto = productsService.getProductById(id);
+    if (!producto) {
+      return res.status(404).json({
+        success: false,
+        error: 'Producto no encontrado'
+      });
+    }
+
+    const eliminado = productsService.deleteProduct(id);
+
+    if (!eliminado) {
+      return res.status(500).json({
+        success: false,
+        error: 'Error al eliminar el producto'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { id },
+      message: 'Producto eliminado exitosamente'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Error al eliminar el producto',
       message: error.message
     });
   }

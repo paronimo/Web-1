@@ -194,6 +194,21 @@ function filterProducts(filters = {}) {
   return filtered;
 }
 
+// Crear producto
+function createProduct(nombre, precio, imagen, stock, categoria, descripcion) {
+  return productModel.create(nombre, precio, imagen, stock, categoria, descripcion);
+}
+
+// Actualizar producto
+function updateProduct(id, nombre, precio, imagen, stock, categoria, descripcion) {
+  return productModel.update(id, nombre, precio, imagen, stock, categoria, descripcion);
+}
+
+// Eliminar producto
+function deleteProduct(id) {
+  return productModel.deleteProduct(id);
+}
+
 module.exports = {
   // Métodos básicos
   getAllProducts,
@@ -213,5 +228,10 @@ module.exports = {
   sortByName,
   
   // Métodos de utilidad
-  getStatistics
+  getStatistics,
+  
+  // Métodos CRUD
+  createProduct,
+  updateProduct,
+  deleteProduct
 };
